@@ -41,7 +41,7 @@ class MoneyLong extends AbstractMoney {
      */
     public double toDouble()
     {
-        return 1.0 * m_units / MoneyFactory.MULTIPLIERS[ m_precision ];
+        return ( ( double ) m_units ) / MoneyFactory.MULTIPLIERS[ m_precision ];
     }
 
     /**
