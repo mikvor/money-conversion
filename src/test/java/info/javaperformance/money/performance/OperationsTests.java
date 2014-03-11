@@ -23,43 +23,6 @@ import java.util.Random;
 
 /**
  * All arithmetic operations
- *
- *
- * long+long - too much conditional logic? (compare to long*long)
- * long*double - should be faster (even after added shortcut - result with same precision)
- Time to add 10000000 MoneyLong values = 0.335 sec; rate = 29850 Kops/sec
- Time to add 10000000 MoneyLong to MoneyBigDecimal values = 11.94 sec; rate = 837 Kops/sec
- Time to add 10000000 MoneyBigDecimal to MoneyBigDecimal values = 16.641 sec; rate = 600 Kops/sec
- Time to multiply 10000000 MoneyLong values by Long = 0.171 sec; rate = 58479 Kops/sec
- Time to multiply 10000000 MoneyLong values by Double = 1.039 sec; rate = 9624 Kops/sec
- Time to multiply 10000000 MoneyBigDecimal values by Long = 12.489 sec; rate = 800 Kops/sec
- Time to multiply 10000000 MoneyBigDecimal values by Double = 18.761 sec; rate = 533 Kops/sec
- Time to divide 10000000 MoneyLong values by Long = 0.67 sec; rate = 14925 Kops/sec
- Time to divide 10000000 MoneyLong values by Double = 0.593 sec; rate = 16863 Kops/sec
- Time to divide 10000000 MoneyBigDecimal values by Long = 16.86 sec; rate = 593 Kops/sec
- Time to divide 10000000 MoneyBigDecimal values by Double = 22.259 sec; rate = 449 Kops/sec
- Time to truncate 10000000 MoneyLong values  = 0.533 sec; rate = 18761 Kops/sec
- Time to truncate 10000000 MoneyBigDecimal values  = 7.091 sec; rate = 1410 Kops/sec
-
-
- Time to add 10000000 MoneyLong values = 0.335 sec; rate = 29850 Kops/sec
- Time to multiply 10000000 MoneyLong values by Long = 0.171 sec; rate = 58479 Kops/sec
- Time to multiply 10000000 MoneyLong values by Double = 1.039 sec; rate = 9624 Kops/sec
- Time to divide 10000000 MoneyLong values by Long = 0.67 sec; rate = 14925 Kops/sec
- Time to divide 10000000 MoneyLong values by Double = 0.593 sec; rate = 16863 Kops/sec
- Time to truncate 10000000 MoneyLong values = 0.533 sec; rate = 18761 Kops/sec
-
- ----------------
-Battery:
-
- Time to add 10000000 MoneyLong values = 0.398 sec; rate = 25125 Kops/sec
- Time to multiply 10000000 MoneyLong values by Long = 0.146 sec; rate = 68493 Kops/sec
- Time to multiply 10000000 MoneyLong values by Double = 0.689 sec; rate = 14513 Kops/sec
- Time to divide 10000000 MoneyLong values by Long = 0.654 sec; rate = 15290 Kops/sec
- Time to divide 10000000 MoneyLong values by Double = 0.578 sec; rate = 17301 Kops/sec
- Time to truncate 10000000 MoneyLong values  = 0.513 sec; rate = 19493 Kops/sec
-
-
  */
 public class OperationsTests {
     private static final int DATA_SIZE = 1000;
@@ -92,11 +55,11 @@ public class OperationsTests {
         testLongAddition( iters );
         testLongAddition( iters );
 
-//        testLongToBigDecimalAddition( warmup );
-//        testLongToBigDecimalAddition( iters );
-//
-//        testBdToBdAddition( warmup );
-//        testBdToBdAddition( iters );
+        testLongToBigDecimalAddition( warmup );
+        testLongToBigDecimalAddition( iters );
+
+        testBdToBdAddition( warmup );
+        testBdToBdAddition( iters );
 
         testLongMultiplyLong(warmup);
         testLongMultiplyLong(iters);
@@ -106,11 +69,11 @@ public class OperationsTests {
         testLongMultiplyDouble(iters);
         testLongMultiplyDouble(iters);
 
-//        testBdMultiplyLong( warmup );
-//        testBdMultiplyLong(iters);
-//
-//        testBdMultiplyDouble( warmup );
-//        testBdMultiplyDouble( iters );
+        testBdMultiplyLong( warmup );
+        testBdMultiplyLong(iters);
+
+        testBdMultiplyDouble( warmup );
+        testBdMultiplyDouble( iters );
 
         testLongDivideLong(warmup);
         testLongDivideLong(iters);
@@ -124,18 +87,18 @@ public class OperationsTests {
         testLongDivisionWithRound( iters );
         testLongDivisionWithRound( iters );
 
-//        testBdDivideLong(warmup);
-//        testBdDivideLong(iters);
-//
-//        testBdDivideDouble(warmup);
-//        testBdDivideDouble(iters);
+        testBdDivideLong(warmup);
+        testBdDivideLong(iters);
+
+        testBdDivideDouble(warmup);
+        testBdDivideDouble(iters);
 
         testLongTruncate( warmup );
         testLongTruncate( iters );
         testLongTruncate( iters );
 
-//        testBdTruncate( warmup );
-//        testBdTruncate( iters );
+        testBdTruncate( warmup );
+        testBdTruncate( iters );
     }
 
     public long testLongAddition( final int iters )
