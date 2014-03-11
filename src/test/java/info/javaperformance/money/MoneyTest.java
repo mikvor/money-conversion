@@ -203,6 +203,29 @@ public class MoneyTest extends TestCase {
 
         final Money res6 = bd1.divide( 1.0 / 3.0, 15 );
         assertEquals( "1", res6.toString() );
+
+        //checking rounding
+        final Money lng2 = MoneyFactory.fromUnits( 66, 2 );
+        final Money res7 = lng2.divide( 2, 1 );
+        assertEquals( 0.3, res7.toDouble() );
+    }
+
+    //this test checks if we can use multiplication by a negative power of 10 in conjunction with rounding
+    public void testDivisionRounding()
+    {
+        long expectedLong = 0;
+        double expected = 0.0;
+        for( long i = 0; i < 10000; i += 2 )
+        {
+            if ( (i % 10 == 0) && ( (i / 10) % 2 == 1) )
+            {
+                expectedLong += 1;
+                expected = expectedLong / 10.0;
+            }
+            final Money src = MoneyFactory.fromUnits( i, 2 );
+            final Money res = src.divide( 2.0, 1 ); //it will always fit in 1 digit of precision
+            assertEquals( expected, res.toDouble() );
+        }
     }
 
     public void testTruncateLong()
@@ -227,6 +250,12 @@ public class MoneyTest extends TestCase {
         assertEquals( "123", lng3.truncate( 2 ).toString() );
         assertEquals( "123", lng3.truncate( 1 ).toString() );
         assertEquals( "123", lng3.truncate( 0 ).toString() );
+
+        final Money lng4 = MoneyFactory.fromUnits( 995, 3 );
+        assertEquals( "1", lng4.truncate( 2 ).toString() );
+
+        final Money lng5 = MoneyFactory.fromUnits( 991, 3 );
+        assertEquals( "0.99", lng5.truncate( 2 ).toString() );
     }
 
     public void testTruncateBd()

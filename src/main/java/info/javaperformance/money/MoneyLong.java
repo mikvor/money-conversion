@@ -183,6 +183,7 @@ class MoneyLong extends AbstractMoney {
     public Money multiply( long multiplier ) {
         final long resUnits = m_units * multiplier;
         //deal with overflow
+        //todo faster overflow test?
         final long origUnits = resUnits / multiplier;
         if ( origUnits != m_units )
         {
@@ -255,7 +256,8 @@ class MoneyLong extends AbstractMoney {
         else // if ( m_precision > precision )
         {
             //m_units = 135, m_precision=3, precision = 2 => round 13.5 to 14
-            destRes = Math.round( unscaledRes / MoneyFactory.MULTIPLIERS[ m_precision - precision ] );
+            //we can multiply by a floating point value here because we will round the result
+            destRes = Math.round( unscaledRes * MoneyFactory.MULTIPLIERS_NEG[ m_precision - precision ] );
         }
         return new MoneyLong( destRes, precision ).normalize();
     }
@@ -273,7 +275,7 @@ class MoneyLong extends AbstractMoney {
         MoneyFactory.checkPrecision( maximalPrecision );
 
         //remove not needed digits
-        long multiplier = MoneyFactory.MULTIPLIERS[ m_precision - maximalPrecision ];
-        return new MoneyLong( Math.round( ((double)m_units) / multiplier ), maximalPrecision ).normalize();
+        //we can multiply by floating point values here because we will round the result afterwards
+        return new MoneyLong( Math.round( m_units * MoneyFactory.MULTIPLIERS_NEG[ m_precision - maximalPrecision ] ), maximalPrecision ).normalize();
     }
 }

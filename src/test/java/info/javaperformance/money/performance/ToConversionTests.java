@@ -54,19 +54,21 @@ public class ToConversionTests {
         for ( int i = 0; i < DATA_SIZE; ++i )
             money[ i ] = MoneyFactory.fromUnits( i, 2 );
         //test
+        double res = 0;
         final int actualLoops = iters / DATA_SIZE;
         final long start = System.currentTimeMillis();
         for ( int i = 0; i < actualLoops; ++i )
         {
             for ( int j = 0; j < DATA_SIZE; ++j )
             {
-                money[ j ].toDouble();
+                res += money[ j ].toDouble();
             }
         }
         final long time = System.currentTimeMillis() - start;
         final long rate = (long) (( 1.0 * iters / ( time / 1000.0 ) )) / 1000;
         if ( iters > 20000 )
             System.out.println( "Time to convert MoneyLong to double " + iters + " times = " + (time/1000.0) + " sec, rate = " + rate + " KOps/sec");
+        System.out.println( res );
         return rate;
     }
 

@@ -120,6 +120,10 @@ public class OperationsTests {
         testLongDivideDouble(iters);
         testLongDivideDouble(iters);
 
+        testLongDivisionWithRound( warmup );
+        testLongDivisionWithRound( iters );
+        testLongDivisionWithRound( iters );
+
 //        testBdDivideLong(warmup);
 //        testBdDivideLong(iters);
 //
@@ -344,6 +348,25 @@ public class OperationsTests {
         final long rate = (long) (1.0 * iters / ( time / 1000.0 )) / 1000;
         if ( iters > 20000 )
             System.out.println( "Time to truncate " + iters + " MoneyBigDecimal values  = " + time / 1000.0 + " sec; rate = " + rate + " Kops/sec");
+        return rate;
+    }
+
+    public long testLongDivisionWithRound( final int iterations )
+    {
+        final int actualIters = iterations / 10000 * 2;
+        final long start = System.currentTimeMillis();
+        for ( int iters = 0; iters < actualIters; ++iters )
+        {
+            for( long i = 0; i < 10000; i += 2 )
+            {
+                final Money src = MoneyFactory.fromUnits( i, 2 );
+                src.divide( 2.0, 1 );
+            }
+        }
+        final long time = System.currentTimeMillis() - start;
+        final long rate = (long) (1.0 * iterations / ( time / 1000.0 )) / 1000;
+        if ( iterations > 20000 )
+            System.out.println( "Time to divide " + iterations + " MoneyLong values via the third branch  = " + time / 1000.0 + " sec; rate = " + rate + " Kops/sec");
         return rate;
     }
 

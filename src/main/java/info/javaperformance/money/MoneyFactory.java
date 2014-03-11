@@ -31,13 +31,17 @@ public class MoneyFactory {
     //needed for overflow checking during conversion
     private static final long MAX_LONG_DIVIDED_BY_10 = Long.MAX_VALUE / 10;
 
+    /** Non-negative powers of 10 */
     static final long[] MULTIPLIERS = new long[ MoneyFactory.MAX_ALLOWED_PRECISION + 1 ];
+    /** Non-positive powers of 10 */
+    static final double[] MULTIPLIERS_NEG = new double[ MoneyFactory.MAX_ALLOWED_PRECISION + 1 ];
     static
     {
         long val = 1;
         for ( int i = 0; i <= MoneyFactory.MAX_ALLOWED_PRECISION; ++i )
         {
             MULTIPLIERS[ i ] = val;
+            MULTIPLIERS_NEG[ i ] = 1.0 / val;
             val *= 10;
         }
     }
