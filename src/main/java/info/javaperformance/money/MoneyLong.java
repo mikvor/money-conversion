@@ -41,6 +41,7 @@ class MoneyLong extends AbstractMoney {
      */
     public double toDouble()
     {
+        //we can not replace division here with multiplication by MULTIPLIERS_NEG - it will sacrifice the exact result guarantee.
         return ( ( double ) m_units ) / MoneyFactory.MULTIPLIERS[ m_precision ];
     }
 
@@ -161,6 +162,7 @@ class MoneyLong extends AbstractMoney {
         long q, rem;
         while ( precision > 0 )
         {
+            //todo move odd check here?
             q = units / 10;
             rem = units - ( (q << 3) + ( q << 1 ) );
             if ( rem != 0 )
@@ -174,6 +176,8 @@ class MoneyLong extends AbstractMoney {
             return new MoneyLong( units, precision );
     }
 
+    final long MASK32 = 0xFFFFFFFF00000000L;
+
     /**
      * Multiply the current object by the <code>long</code> value.
      *
@@ -182,8 +186,12 @@ class MoneyLong extends AbstractMoney {
      */
     public Money multiply( long multiplier ) {
         final long resUnits = m_units * multiplier;
-        //deal with overflow
-        //todo faster overflow test?
+        //fast overflow test - if both values fit in the 32 bits (and positive), they can not overflow
+        if ( ( (m_units | multiplier) & MASK32 ) == 0 )
+            return new MoneyLong( resUnits, m_precision ).normalize();
+
+        //slower overflow test - check if we will get the original value back after division. It is not possible
+        //in case of overflow.
         final long origUnits = resUnits / multiplier;
         if ( origUnits != m_units )
         {
