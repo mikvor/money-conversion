@@ -19,6 +19,8 @@ package info.javaperformance.money.performance;
 import info.javaperformance.money.Money;
 import info.javaperformance.money.MoneyFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -49,56 +51,59 @@ public class OperationsTests {
             dataBd[ i ] = MoneyFactory.fromDouble((i + 1) / 10000.0, 1);
     }
 
-    public void runAllTests( final int warmup, final int iters )
+    public List<TestResult> runAllTests( final int warmup, final int iters )
     {
+        final List<TestResult> res = new ArrayList<TestResult>( 7 );
         testLongAddition( warmup );
-        testLongAddition( iters );
-        testLongAddition( iters );
+        res.add(new TestResult("MoneyLong+MoneyLong", Math.max(testLongAddition(iters), testLongAddition(iters))));
 
-        testLongToBigDecimalAddition( warmup );
-        testLongToBigDecimalAddition( iters );
+        testLongToBigDecimalAddition(warmup);
+        res.add(new TestResult("MoneyLong+MoneyBigDecimal", Math.max(testLongToBigDecimalAddition(iters), testLongToBigDecimalAddition(iters))));
 
-        testBdToBdAddition( warmup );
-        testBdToBdAddition( iters );
+        testBdToBdAddition(warmup);
+        res.add(new TestResult("MoneyBigDecimal+MoneyBigDecimal", Math.max(testBdToBdAddition(iters), testBdToBdAddition(iters))));
 
         testLongMultiplyLong(warmup);
-        testLongMultiplyLong(iters);
-        testLongMultiplyLong(iters);
-
-        testLongMultiplyDouble(warmup);
-        testLongMultiplyDouble(iters);
-        testLongMultiplyDouble(iters);
+        final TestResult multByLong = new TestResult( "multiply(long)", Math.max( testLongMultiplyLong(iters), testLongMultiplyLong(iters) ));
 
         testBdMultiplyLong( warmup );
-        testBdMultiplyLong(iters);
+        multByLong.bdRate = Math.max( testBdMultiplyLong(iters), testBdMultiplyLong(iters) );
+        res.add( multByLong);
+
+        testLongMultiplyDouble(warmup);
+        final TestResult multByDouble = new TestResult( "multiply(double)", Math.max( testLongMultiplyDouble(iters), testLongMultiplyDouble(iters) ));
 
         testBdMultiplyDouble( warmup );
-        testBdMultiplyDouble( iters );
+        multByDouble.bdRate = Math.max( testBdMultiplyDouble( iters ), testBdMultiplyDouble( iters ) );
+        res.add( multByDouble );
 
         testLongDivideLong(warmup);
-        testLongDivideLong(iters);
-        testLongDivideLong(iters);
-
-        testLongDivideDouble(warmup);
-        testLongDivideDouble(iters);
-        testLongDivideDouble(iters);
-
-        testLongDivisionWithRound( warmup );
-        testLongDivisionWithRound( iters );
-        testLongDivisionWithRound( iters );
+        final TestResult divideLong = new TestResult( "divide(long)", Math.max(testLongDivideLong(iters), testLongDivideLong(iters)) );
 
         testBdDivideLong(warmup);
-        testBdDivideLong(iters);
+        divideLong.bdRate = Math.max( testBdDivideLong(iters), testBdDivideLong(iters) );
+        res.add( divideLong );
+
+        testLongDivideDouble(warmup);
+        final TestResult divideDouble = new TestResult( "divide(double)", Math.max(testLongDivideDouble(iters), testLongDivideDouble(iters)) );
 
         testBdDivideDouble(warmup);
-        testBdDivideDouble(iters);
+        divideDouble.bdRate = Math.max( testBdDivideDouble(iters), testBdDivideDouble(iters) );
+        res.add( divideDouble );
+
+        //no test result for this
+        testLongDivisionWithRound(warmup);
+        testLongDivisionWithRound( iters );
+        testLongDivisionWithRound( iters );
 
         testLongTruncate( warmup );
-        testLongTruncate( iters );
-        testLongTruncate( iters );
+        final TestResult trunc = new TestResult( "truncate", Math.max( testLongTruncate( iters ), testLongTruncate( iters ) ) );
 
         testBdTruncate( warmup );
-        testBdTruncate( iters );
+        trunc.bdRate = Math.max( testBdTruncate( iters ), testBdTruncate( iters ) );
+        res.add( trunc );
+
+        return res;
     }
 
     public long testLongAddition( final int iters )

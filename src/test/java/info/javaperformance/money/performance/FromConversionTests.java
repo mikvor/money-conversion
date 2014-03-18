@@ -19,6 +19,8 @@ package info.javaperformance.money.performance;
 import info.javaperformance.money.MoneyFactory;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Testing conversion from various data types into Money performance
@@ -27,23 +29,27 @@ public class FromConversionTests {
     public static void main(String[] args) {
         new FromConversionTests().runAllTests( 20000, 10 * 1000 * 1000 );
     }
-    
-    public void runAllTests( final int warmup, final int iters )
+
+    public List<TestResult> runAllTests( final int warmup, final int iters )
     {
+        final List<TestResult> res = new ArrayList<TestResult>( 4 );
+
         testFromDoubleConversion( warmup );
-        testFromDoubleConversion( iters );
+        res.add(new TestResult("From double", testFromDoubleConversion(iters)));
 
         testFromStringConversion1Digit( warmup );
-        testFromStringConversion1Digit( iters );
+        res.add(new TestResult("From string 1 decimal digit", testFromStringConversion1Digit(iters)));
 
         testFromStringConversion4Digits( warmup );
-        testFromStringConversion4Digits( iters );
+        res.add(new TestResult("From string 4 decimal digits", testFromStringConversion4Digits(iters)));
 
         testFromBigDecimalConversionIn3DigitsRange( warmup );
-        testFromBigDecimalConversionIn3DigitsRange( iters );
+        res.add(new TestResult("From BigDecimal 1 decimal digit", testFromBigDecimalConversionIn3DigitsRange(iters)));
 
         testFromBigDecimalConversionOutOf3DigitsRange( warmup );
-        testFromBigDecimalConversionOutOf3DigitsRange( iters );
+        res.add(new TestResult("From BigDecimal 4 decimal digits", testFromBigDecimalConversionOutOf3DigitsRange(iters)));
+
+        return res;
     }
 
     public long testFromDoubleConversion( final int iters )

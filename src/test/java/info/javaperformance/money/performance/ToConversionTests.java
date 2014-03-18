@@ -19,6 +19,9 @@ package info.javaperformance.money.performance;
 import info.javaperformance.money.Money;
 import info.javaperformance.money.MoneyFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Testing conversion to various types
  */
@@ -27,23 +30,28 @@ public class ToConversionTests {
         new ToConversionTests().runAllTests( 20000, 10 * 1000 * 1000 );
     }
 
-    public void runAllTests( final int warmup, final int iters )
+    public List<TestResult> runAllTests( final int warmup, final int iters )
     {
         testLongToDouble( warmup );
-        testLongToDouble( iters * 10 );
+        final TestResult toDouble = new TestResult( "toDouble", testLongToDouble( iters * 10 ) );
 
-        //todo performance could be improved here
         testLongToString( warmup );
-        testLongToString( iters );
+        final TestResult toString = new TestResult( "toString", testLongToString( iters ) );
 
         testLongToBigDecimal( warmup );
-        testLongToBigDecimal( iters );
+        final TestResult toBigDecimal = new TestResult( "toBigDecimal", testLongToBigDecimal( iters ) );
 
         testBigDecimalToDouble( warmup );
-        testBigDecimalToDouble( iters );
+        toDouble.bdRate = testBigDecimalToDouble( iters );
 
         testBigDecimalToString( warmup );
-        testBigDecimalToString( iters );
+        toString.bdRate = testBigDecimalToString( iters );
+
+        final List<TestResult> res = new ArrayList<TestResult>( 3 );
+        res.add( toDouble );
+        res.add( toString );
+        res.add( toBigDecimal );
+        return res;
     }
 
     private long testLongToDouble( final int iters )
