@@ -279,9 +279,9 @@ public class MoneyFactory {
         //attempt direct
         final Money direct = fromDoubleNoFallback( value, precision );
         if ( direct != null )
-            return direct.truncate(precision);
+            return direct;
 
-        return new MoneyBigDecimal( value ).truncate(precision);
+        return new MoneyBigDecimal( value );
     }
 
     static MoneyLong fromDoubleNoFallback( final double value, final int precision )
