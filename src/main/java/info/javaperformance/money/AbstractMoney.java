@@ -40,7 +40,7 @@ abstract class AbstractMoney implements Money {
 
     protected Money add( final MoneyBigDecimal other )
     {
-        final BigDecimal res = toBigDecimal().add( other.toBigDecimal(), MathContext.DECIMAL64 );
+        final BigDecimal res = toBigDecimal().add( other.toBigDecimal(), MathContext.DECIMAL128 );
         return MoneyFactory.fromBigDecimal( res );
     }
 

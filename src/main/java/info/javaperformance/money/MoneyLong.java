@@ -132,7 +132,7 @@ class MoneyLong extends AbstractMoney {
         return 31 * result + m_precision;
     }
 
-    public MoneyLong add( final MoneyLong other )
+    public Money add( final MoneyLong other )
     {
         long normUnitsRes;
         int precision = m_precision;
@@ -145,6 +145,9 @@ class MoneyLong extends AbstractMoney {
             normUnitsRes = m_units * MoneyFactory.MULTIPLIERS[ other.m_precision - m_precision ] + other.m_units;
             precision = other.m_precision;
         }
+        //cheap overflow check, it does not cover a case when normUnitsRes get positive
+        if ( m_units >= 0 && other.m_units >= 0 && normUnitsRes < 0 )
+            return new MoneyBigDecimal( toBigDecimal() ).add( other );
         return new MoneyLong( normUnitsRes, precision ).normalize();
     }
 
@@ -211,7 +214,7 @@ class MoneyLong extends AbstractMoney {
         final double unscaledRes = m_units * multiplier; //need to apply precision
         //try to check if we got an integer value first
         final long unscaledLng = (long) unscaledRes;
-        if ( unscaledLng == unscaledRes )
+        if ( unscaledLng == unscaledRes ) //possible overflow is also checked here
             return new MoneyLong( unscaledLng, m_precision ).normalize();
 
         //4 is a "safe" precision of this calculation. The higher it is - the less results will end up
@@ -223,7 +226,7 @@ class MoneyLong extends AbstractMoney {
             if ( unscaledLong.m_precision + m_precision <= MoneyFactory.MAX_ALLOWED_PRECISION )
                 return new MoneyLong( unscaledLong.m_units, unscaledLong.m_precision + m_precision ).normalize();
         }
-        //slow path via BD. We may still get MoneyLong on this branch is the unscaledRes precision is too high.
+        //slow path via BD. We may still get MoneyLong on this branch if the unscaledRes precision is too high.
         return MoneyFactory.fromBigDecimal(
                 toBigDecimal().multiply( new BigDecimal( multiplier, MathContext.DECIMAL64 ), MathContext.DECIMAL64 ) );
     }

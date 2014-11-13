@@ -169,5 +169,26 @@ public class MoneyFactoryTest extends TestCase {
         assertEquals( number, MoneyFactory.fromByteArray(buffer, 10, bytes.length).toString() );
     }
 
+    public void testManyDecimals() {
+        // 8860415583022323200
+        //  804798809343434368
+        // 9665.214392365757568  //19 digits
+        // 9223.372036854775807  //Long.MAX_VALUE
+
+        Money sum = MoneyFactory.fromCharSequence(  "8860.4155830223232" );        //precision=13, digits=17
+        Money toAdd = MoneyFactory.fromCharSequence( "804.798809343434368" );      //precision=15, digits=18
+        Money newSum = sum.add( toAdd );
+        assertTrue( newSum instanceof MoneyBigDecimal );
+        assertTrue("Value of newSum is " + newSum, newSum.toDouble() > 0);
+    }
+
+    public void testManyDecimals2() {
+        Money sum = MoneyFactory.fromCharSequence(  "9999998860.4155830223232" );
+        Money toAdd = MoneyFactory.fromCharSequence( "999999804.798809343434368" );
+        Money newSum = sum.add(toAdd);
+        assertTrue( newSum instanceof MoneyBigDecimal );
+        assertTrue("Value of newSum is " + newSum, newSum.toDouble() > 0);
+    }
+
 
 }
