@@ -190,5 +190,14 @@ public class MoneyFactoryTest extends TestCase {
         assertTrue("Value of newSum is " + newSum, newSum.toDouble() > 0);
     }
 
+    public void testBigDecimals() {
+        //22543.6089278196672         //18 digits, precision=13
+        //  805.694827586206976       //18 digits, precision=15
+        Money sum = MoneyFactory.fromCharSequence("22543.6089278196672");
+        Money toAdd = MoneyFactory.fromCharSequence("805.694827586206976");
+        Money newSum = sum.add(toAdd);
+        assertTrue("Value too small: " + newSum, newSum.toDouble() > 22000);
+    }
+
 
 }

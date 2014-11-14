@@ -138,16 +138,25 @@ class MoneyLong extends AbstractMoney {
         int precision = m_precision;
         if ( m_precision == other.m_precision )
             normUnitsRes = m_units + other.m_units;
-        else if ( m_precision > other.m_precision )
-            normUnitsRes = m_units + other.m_units * MoneyFactory.MULTIPLIERS[ m_precision - other.m_precision ];
+        else if ( m_precision > other.m_precision ) {
+            long multiplier = MoneyFactory.MULTIPLIERS[m_precision - other.m_precision];
+            long mult = other.m_units * multiplier;
+            if ( mult / multiplier != other.m_units ) //overflow check, alternative is double multiplication and compare with Long.MAX_VALUE.
+                return other.add( new MoneyBigDecimal( toBigDecimal() ) );
+            normUnitsRes = m_units + mult;
+        }
         else
         {
-            normUnitsRes = m_units * MoneyFactory.MULTIPLIERS[ other.m_precision - m_precision ] + other.m_units;
+            long multiplier = MoneyFactory.MULTIPLIERS[other.m_precision - m_precision];
+            long mult = m_units * multiplier;
+            if ( mult / multiplier != m_units ) //overflow check
+                return  other.add( new MoneyBigDecimal( toBigDecimal() ) );
+            normUnitsRes = mult + other.m_units;
             precision = other.m_precision;
         }
         //cheap overflow check, it does not cover a case when normUnitsRes get positive
         if ( m_units >= 0 && other.m_units >= 0 && normUnitsRes < 0 )
-            return new MoneyBigDecimal( toBigDecimal() ).add( other );
+            return other.add( new MoneyBigDecimal( toBigDecimal() ) );
         return new MoneyLong( normUnitsRes, precision ).normalize();
     }
 
