@@ -62,7 +62,7 @@ public class MoneyFactory {
     public static Money fromUnits( final long units, final int precision )
     {
         checkPrecision( precision );
-        return new MoneyLong( units, precision );
+        return new MoneyLong( units, precision ).normalize();
     }
 
     /**
