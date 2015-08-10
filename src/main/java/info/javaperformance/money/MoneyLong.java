@@ -160,6 +160,16 @@ class MoneyLong extends AbstractMoney {
         return new MoneyLong( normUnitsRes, precision ).normalize();
     }
 
+    @Override
+    protected int compareTo(MoneyLong other) {
+        // This allows for pretty deprecation that will be invisible to the end-user.
+        // Double.compare(toDouble(), other.toDouble()) may possibly be used here for MoneyLong to MoneyLong checks.
+        // which returns the appropriate response for -NaN;NaN and -0.0;0.0 cases. There isn't a operations performance
+        // boost between Double.compare() and BigDecimal's compareTo(). However BigDecimal requires additional
+        // allocation and memory space(~x5).
+        return toBigDecimal().compareTo(other.toBigDecimal());
+    }
+
     /**
      * If <code>m_units</code> ends with zeroes - reduce the <code>m_precision</code> accordingly
      * @return Normalized value

@@ -92,6 +92,11 @@ class MoneyBigDecimal extends AbstractMoney {
         return other.add( this ); //implemented in MoneyLong
     }
 
+    @Override
+    protected int compareTo(MoneyLong other) {
+        return -(other.compareTo(this)); // flips the response with unary
+    }
+
     /**
      * Multiply the current object by the <code>long</code> value.
      *

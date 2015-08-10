@@ -30,7 +30,7 @@ import java.math.BigDecimal;
  *  calculation is over.
  * </p>
  */
-public interface Money {
+public interface Money extends Comparable<Money> {
 
     /**
      * Convert to the original currency - divide <code>units</code> by <code>10^precision</code>.
@@ -107,4 +107,21 @@ public interface Money {
      * @return A new Money object normalized to the efficient representation if possible
      */
     public Money truncate( final int maximalPrecision );
+
+    /**
+     * Compares another Money object to this one. Should be used like {@link BigDecimal#compareTo(Object)}. May or may
+     * not share the same specification, read return. However this method will be up to specification as defined in
+     * {@link Comparable}
+     * <p>
+     * Two {@code Money} objects that are equal in value but have a different scale (like 2.0 and 2.00)
+     * are considered equal by this method.  This method is provided in preference to individual methods for each of
+     * the six boolean comparison operators ({@literal <}, ==, {@literal >}, {@literal >=}, !=, {@literal <=}).  The
+     * suggested idiom for performing these comparisons is: {@code (x.compareTo(y)} &lt;<i>op</i>&gt; {@code 0)}, where
+     * {@code op} is one of the six comparison operators.
+     * @param other Other money object
+     * @return As of this version, -1, 0, or 1 as this {@code Money} is numerically less than, equal to, or greater
+     * than {@code other}. This specification may possibly change to -x or x with x representing the difference in
+     * precision. I.E If the number is negative than it will still be numerically less than {@code other}.
+     */
+    public int compareTo(final Money other);
 }
