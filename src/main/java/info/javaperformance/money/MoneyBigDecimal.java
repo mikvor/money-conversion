@@ -136,7 +136,7 @@ class MoneyBigDecimal extends AbstractMoney {
      */
     public Money divide( final double divider, final int precision )
     {
-        final BigDecimal res = m_value.divide( new BigDecimal( divider ), MathContext.DECIMAL64 ).stripTrailingZeros();
+        final BigDecimal res = m_value.divide( BigDecimal.valueOf( divider ), MathContext.DECIMAL64 ).stripTrailingZeros();
         return truncate( res, precision );
     }
 
