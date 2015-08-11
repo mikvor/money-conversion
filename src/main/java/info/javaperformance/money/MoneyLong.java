@@ -160,13 +160,32 @@ class MoneyLong extends AbstractMoney {
         return new MoneyLong( normUnitsRes, precision ).normalize();
     }
 
+    private static int compare( final long x, final long y )
+    {
+        return ( x < y ) ? -1 : ( ( x == y ) ? 0 : 1 );
+    }
+
     @Override
-    protected int compareTo(MoneyLong other) {
-        // This allows for pretty deprecation that will be invisible to the end-user.
-        // Double.compare(toDouble(), other.toDouble()) may possibly be used here for MoneyLong to MoneyLong checks.
-        // which returns the appropriate response for -NaN;NaN and -0.0;0.0 cases. There isn't a operations performance
-        // boost between Double.compare() and BigDecimal's compareTo(). However BigDecimal requires additional
-        // allocation and memory space(~x5).
+    protected int compareTo( final MoneyLong other )
+    {
+        if ( m_precision == other.m_precision )
+            return compare( m_units, other.m_units );
+        if ( m_precision < other.m_precision )
+        {
+            final long multiplier = MoneyFactory.MULTIPLIERS[ other.m_precision - m_precision ];
+            final long mult = m_units * multiplier;
+            if ( mult / multiplier == m_units ) //overflow check
+                return compare( mult, other.m_units );
+        }
+        if ( m_precision > other.m_precision )
+        {
+            final long multiplier = MoneyFactory.MULTIPLIERS[ m_precision - other.m_precision ];
+            final long mult = other.m_units * multiplier;
+            if ( mult / multiplier == other.m_units ) //overflow check
+                return compare( m_units, mult );
+        }
+
+        //fallback for generic case
         return toBigDecimal().compareTo(other.toBigDecimal());
     }
 
@@ -198,7 +217,7 @@ class MoneyLong extends AbstractMoney {
             return new MoneyLong( units, precision );
     }
 
-    final long MASK32 = 0xFFFFFFFF00000000L;
+    private static final long MASK32 = 0xFFFFFFFF00000000L;
 
     /**
      * Multiply the current object by the <code>long</code> value.

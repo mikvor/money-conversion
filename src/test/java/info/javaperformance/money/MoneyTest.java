@@ -282,5 +282,17 @@ public class MoneyTest extends TestCase {
         assertEquals( "123", val3.truncate( 0 ).toString() );
     }
 
+    public void testCompareTo()
+    {
+        final Money v1 = new MoneyLong( 20, 1 );
+        final Money v2 = new MoneyLong( 200, 2 );
+        final Money v3 = new MoneyLong( 400, 2 );
+        final Money v4 = new MoneyLong( 4000, 3 );
+        assertEquals( 0, v1.compareTo( v2 ) );
+        assertEquals( 0, v3.compareTo( v4 ) );
+        assertTrue( v1.compareTo( v3 ) < 0 );
+        assertTrue( v3.compareTo( v2 ) > 0 );
+        assertTrue( v4.compareTo( v2 ) > 0 );
+    }
 
 }
