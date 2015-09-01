@@ -106,4 +106,16 @@
     <scm>
         <url>scm:git:https://github.com/mikvor/money-conversion.git</url>
     </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus</id>
+            <url>http://galaxy.natebrau.info:8081/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus</id>
+            <url>http://galaxy.natebrau.info:8081/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
 </project>
