@@ -104,7 +104,9 @@
     </developers>
 
     <scm>
-        <url>scm:git:https://github.com/mikvor/money-conversion.git</url>
+        <url>https://github.com/minmay/money-conversion</url>
+        <connection>scm:git:git://github.com/minmay/money-conversion.git</connection>
+        <developerConnection>scm:git:git@github.com:minmay/money-conversion.git</developerConnection>
     </scm>
 
     <distributionManagement>
