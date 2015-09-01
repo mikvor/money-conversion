@@ -21,7 +21,7 @@ import java.math.BigInteger;
 
 /**
  * Converter from String/double/float/integer types into Money instances.
- * Requires the precision to be specified for double->Money conversion. Precision is usually based
+ * Requires the precision to be specified for double to Money conversion. Precision is usually based
  * on the smallest tick in your exchange data.
  */
 public class MoneyFactory {
@@ -315,7 +315,7 @@ public class MoneyFactory {
      * <p>
      *     Convert a given BigDecimal value into money. Conversion is similar to <code>toDouble</code>,
      *     though this method does not attempt to make any corrections: it assumes that BigDecimal is a result
-     *     of exact calcualtions.
+     *     of exact calculations.
      * </p>
      * <p>
      *     This method will try to use the most efficient representation if possible.
