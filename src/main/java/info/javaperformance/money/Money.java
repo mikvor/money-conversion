@@ -102,7 +102,7 @@ public interface Money extends Comparable<Money> {
 
     /**
      * Truncate the current value leaving no more than {@code maximalPrecision} signs after decimal point.
-     * The number will be rounded towards closest digit (0-4 -> 0; 5-9 -> 1)
+     * The number will be rounded towards closest digit (0-4 -{@literal <} 0; 5-9 -{@literal >} 1)
      * @param maximalPrecision Required precision
      * @return A new Money object normalized to the efficient representation if possible
      */
