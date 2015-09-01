@@ -21,7 +21,7 @@ import java.math.BigInteger;
 
 /**
  * Converter from String/double/float/integer types into Money instances.
- * Requires the precision to be specified for double->Money conversion. Precision is usually based
+ * Requires the precision to be specified for double-{@literal >}Money conversion. Precision is usually based
  * on the smallest tick in your exchange data.
  */
 public class MoneyFactory {
