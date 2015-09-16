@@ -295,4 +295,12 @@ public class MoneyTest extends TestCase {
         assertTrue( v4.compareTo( v2 ) > 0 );
     }
 
+    public void testTicket11()
+    {
+        final Money total = MoneyFactory.fromString( "5.5999999523162842" );
+        final Money x = MoneyFactory.fromDouble( 5 );
+        final Money res = total.subtract( x );
+        assertNotNull( res ); //simply should not throw an exception
+    }
+
 }
