@@ -302,5 +302,48 @@ public class MoneyTest extends TestCase {
         final Money res = total.subtract( x );
         assertNotNull( res ); //simply should not throw an exception
     }
-
+	
+	public void testSignum()
+	{
+		final Money ZERO = new MoneyLong(0,0);
+		
+		final Money v1 = new MoneyLong( 1, 1 );
+        final Money v2 = new MoneyLong( -1, 2 );
+        final Money v3 = new MoneyLong( 0, 3 );
+        assertEquals( 1, v1.signum( ) );
+        assertEquals( -1, v2.signum( ) );
+		assertEquals( 0, v3.signum( ) );
+		
+		final Money v4 = new MoneyBigDecimal( "-1.1" );
+        final Money v5 = new MoneyBigDecimal( "0.01" );
+        final Money v6 = new MoneyBigDecimal( "0.0000" );
+        assertEquals( -1, v4.signum( ) );
+        assertEquals( 1, v5.signum( ) );
+		assertEquals( 0, v6.signum( ) );
+		
+		assertEquals( v1.compareTo(ZERO), v1.signum( ) );
+		assertEquals( v2.compareTo(ZERO), v2.signum( ) );
+		assertEquals( v3.compareTo(ZERO), v3.signum( ) );
+		
+		assertEquals( v4.compareTo(ZERO), v4.signum( ) );
+		assertEquals( v5.compareTo(ZERO), v5.signum( ) );
+		assertEquals( v6.compareTo(ZERO), v6.signum( ) );
+	}
+	
+	public void isZero()
+	{
+		final Money v1 = new MoneyLong( 1, 1 );
+        final Money v2 = new MoneyLong( -1, 2 );
+        final Money v3 = new MoneyLong( 0, 3 );
+        assertFalse(v1.isZero());
+		assertFalse(v2.isZero());
+		assertTrue(v3.isZero());
+        
+		final Money v4 = new MoneyBigDecimal( "-1.1" );
+        final Money v5 = new MoneyBigDecimal( "0.01" );
+        final Money v6 = new MoneyBigDecimal( "0.0000" );
+        assertFalse(v4.isZero());
+		assertFalse(v5.isZero());
+		assertTrue(v6.isZero());
+	}
 }

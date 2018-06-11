@@ -124,4 +124,16 @@ public interface Money extends Comparable<Money> {
      * precision. I.E If the number is negative than it will still be numerically less than {@code other}.
      */
     public int compareTo(final Money other);
+	
+	/**
+	 * Returns the signum function result of this Money instance.
+     * @return -1, 0, or 1 as the value of this Money is negative, zero, or positive.
+	 */
+	public int signum();
+	
+	/**
+	 * Returns true if the amount is exactly ZERO (0), regardless of the prevision
+	 * @return true, if equal to zero
+	 */
+	public boolean isZero();
 }

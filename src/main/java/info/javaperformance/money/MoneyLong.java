@@ -329,4 +329,15 @@ class MoneyLong extends AbstractMoney {
         //we can multiply by floating point values here because we will round the result afterwards
         return new MoneyLong( Math.round( m_units * MoneyFactory.MULTIPLIERS_NEG[ m_precision - maximalPrecision ] ), maximalPrecision ).normalize();
     }
+	
+	
+	@Override
+	public int signum() {
+		return Long.signum(m_units);
+	}
+
+	@Override
+	public boolean isZero() {
+		return signum() == 0;
+	}
 }

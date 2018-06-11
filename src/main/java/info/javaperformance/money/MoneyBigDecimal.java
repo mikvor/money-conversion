@@ -171,4 +171,14 @@ class MoneyBigDecimal extends AbstractMoney {
             return this;
         return truncate(m_value, maximalPrecision);
     }
+
+	@Override
+	public int signum() {
+		return m_value.signum();
+	}
+
+	@Override
+	public boolean isZero() {
+		return signum() == 0;
+	}
 }
