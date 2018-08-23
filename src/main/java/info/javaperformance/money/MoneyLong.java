@@ -237,7 +237,7 @@ class MoneyLong extends AbstractMoney {
         if ( origUnits != m_units )
         {
             final BigInteger res = BigInteger.valueOf( m_units ).multiply( BigInteger.valueOf( multiplier ) );
-            return MoneyFactory.fromBigDecimal( new BigDecimal( res ) );
+            return MoneyFactory.fromBigDecimal( new BigDecimal( res, m_precision ) );
         }
         return new MoneyLong( resUnits, m_precision ).normalize();
     }
