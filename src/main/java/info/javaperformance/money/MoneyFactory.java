@@ -25,20 +25,33 @@ import java.math.BigInteger;
  * on the smallest tick in your exchange data.
  */
 public class MoneyFactory {
+    public static final Money ZERO = new MoneyLong(0, 0);
+    public static final Money ONE = new MoneyLong(1, 0);
+    public static final Money TWO = new MoneyLong(2, 0);
+    public static final Money THREE = new MoneyLong(3, 0);
+    public static final Money FOUR = new MoneyLong(4, 0);
+    public static final Money FIVE = new MoneyLong(5, 0);
+    public static final Money SIX = new MoneyLong(6, 0);
+    public static final Money SEVEN = new MoneyLong(7, 0);
+    public static final Money EIGHT = new MoneyLong(8, 0);
+    public static final Money NINE = new MoneyLong(9, 0);
+    public static final Money TEN = new MoneyLong(10, 0);
+    
     static final int MAX_LONG_LENGTH = Long.toString( Long.MAX_VALUE ).length();
 
     public static final int MAX_ALLOWED_PRECISION = 15;
     //needed for overflow checking during conversion
     private static final long MAX_LONG_DIVIDED_BY_10 = Long.MAX_VALUE / 10;
 
+    static final int MAX_POW10 = 18;
     /** Non-negative powers of 10 */
-    static final long[] MULTIPLIERS = new long[ MoneyFactory.MAX_ALLOWED_PRECISION + 1 ];
+    public static final long[] MULTIPLIERS = new long[ MAX_POW10 + 1 ];
     /** Non-positive powers of 10 */
-    static final double[] MULTIPLIERS_NEG = new double[ MoneyFactory.MAX_ALLOWED_PRECISION + 1 ];
+    static final double[] MULTIPLIERS_NEG = new double[ MAX_POW10 + 1 ];
     static
     {
         long val = 1;
-        for ( int i = 0; i <= MoneyFactory.MAX_ALLOWED_PRECISION; ++i )
+        for ( int i = 0; i <= MoneyFactory.MAX_POW10; ++i )
         {
             MULTIPLIERS[ i ] = val;
             MULTIPLIERS_NEG[ i ] = 1.0 / val;
@@ -63,6 +76,20 @@ public class MoneyFactory {
     {
         checkPrecision( precision );
         return new MoneyLong( units, precision ).normalize();
+    }
+    
+    /**
+     * Convert from currency units and their precision into Money object.
+     * @param units Currency units (cents, for example)
+     * @param precision Number of digits after decimal point in your smallest possible currency unit. Should be between
+     *                  0 and <code>MAX_ALLOWED_PRECISION</code> (inclusive).
+     * @return Money object
+     * @throws java.lang.IllegalArgumentException In case of invalid precision
+     */
+    public static Money fromUnitsNotNormalized( final long units, final int precision )
+    {
+        checkPrecision( precision );
+        return new MoneyLong( units, precision );
     }
 
     /**
@@ -148,7 +175,7 @@ public class MoneyFactory {
      */
     public static Money fromCharSequence( final CharSequence seq )
     {
-        final Money fast = parseFast( seq );
+        final Money fast = parseFast( seq, true );
         if ( fast != null )
             return fast;
         return fromString0( seq.toString() ); //slow path, convert to String
@@ -164,12 +191,23 @@ public class MoneyFactory {
     public static Money fromString( final String value )
     {
         //fast single pass parser first
-        final Money fast = parseFast( value );
+        final Money fast = parseFast( value, true );
         if ( fast != null )
             return fast;
 
         return fromString0(value);
     }
+    
+     public static Money fromStringNotNormalized( final String value )
+    {
+        //fast single pass parser first
+        final Money fast = parseFast( value, false );
+        if ( fast != null )
+            return fast;
+
+        return fromString0(value);
+    }
+
 
     private static Money fromString0( final String value )
     {
@@ -203,7 +241,7 @@ public class MoneyFactory {
      * @return Money object or null (if can't parse)
      * @throws java.lang.IllegalArgumentException If a value has more than one decimal digit
      */
-    private static Money parseFast( final CharSequence str )
+    private static Money parseFast( final CharSequence str, boolean normalize )
     {
         if ( str.length() >= MAX_LONG_LENGTH )
             return null;
@@ -235,8 +273,14 @@ public class MoneyFactory {
             else //unsupported char, handle in the caller
                 return null;
         }
-        if ( precision >= 0 && precision <= MAX_ALLOWED_PRECISION )
-            return new MoneyLong( res * sign, precision ).normalize();
+        if ( precision >= 0 && precision <= MAX_ALLOWED_PRECISION ) {
+            MoneyLong obj = new MoneyLong( res * sign, precision );
+            if(normalize) {
+                return obj.normalize();
+            } else {
+                return obj;
+            }
+        }
         else
             return new MoneyBigDecimal( str.toString() );
     }
@@ -362,5 +406,5 @@ public class MoneyFactory {
         return new MoneyLong( units, 0 );
 
     }
-
+    
 }

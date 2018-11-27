@@ -16,53 +16,69 @@
 
 package info.javaperformance.money;
 
-import junit.framework.TestCase;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
-public class MoneyTest extends TestCase {
+public class MoneyTest {
+
+    public MoneyTest() {
+    }
+
+	
+	@Test
     public void testAdd()
     {
         //long and long
         final Money long02 = MoneyFactory.fromDouble( 0.2, 1 );
         final Money long03 = MoneyFactory.fromDouble( 0.3, 1 );
         final Money long05 = long02.add( long03 );
-        assertEquals( 0.5, long05.toDouble() );
+        assertEquals( 0.5, long05.toDouble(), 0.00001);
         //long and BD
         final Money bd005 = MoneyFactory.fromDouble( 0.05, 1 );
         final Money bd025 = bd005.add( long02 );
-        assertEquals( 0.25, bd025.toDouble() );
-        assertEquals( "0.25", bd025.toString() );
+        assertEquals( 0.25, bd025.toDouble(), 0.00001);
+        assertEquals( "0.25", bd025.toString());
         //BD and BD
         final Money long01 = bd005.add( bd005 );
         assertTrue( long01 instanceof  MoneyLong );
-        assertEquals(0.1, long01.toDouble());
+        assertEquals(0.1, long01.toDouble(), 0.00001);
         assertEquals( "0.1", long01.toString() );
     }
 
+	@Test
     public void testAdd2()
     {
         final Money bd0005 = MoneyFactory.fromDouble( 0.005, 2 );
         final Money bd9995 = MoneyFactory.fromDouble( 9.995, 2 );
         final Money long10 = bd0005.add( bd9995 );
         assertTrue( long10 instanceof MoneyLong );
-        assertEquals(10.0, long10.toDouble());
+        assertEquals(10.0, long10.toDouble(), 0.0001);
         assertEquals( "10", long10.toString() );
 
         final Money long001 = bd0005.add( bd0005 );
         assertTrue( long001 instanceof MoneyLong );
-        assertEquals(0.01, long001.toDouble());
+        assertEquals(0.01, long001.toDouble(), 0.0001);
         assertEquals( "0.01", long001.toString() );
 
         final Money long3567 = MoneyFactory.fromDouble( 35.67, 2 );
         assertEquals( "35.67", long3567.toString() );
 
-        assertEquals( 100.0, MoneyFactory.fromDouble(50, 2).add(MoneyFactory.fromString("50")).toDouble());
-        assertEquals( 100.5, MoneyFactory.fromDouble(50, 2).add(MoneyFactory.fromString("50.5")).toDouble());
-        assertEquals( 100.5, MoneyFactory.fromDouble(50.5, 2).add(MoneyFactory.fromString("50")).toDouble());
+        assertEquals( 100.0, MoneyFactory.fromDouble(50, 2).add(MoneyFactory.fromString("50")).toDouble(), 0.00001);
+        assertEquals( 100.5, MoneyFactory.fromDouble(50, 2).add(MoneyFactory.fromString("50.5")).toDouble(), 0.00001);
+        assertEquals( 100.5, MoneyFactory.fromDouble(50.5, 2).add(MoneyFactory.fromString("50")).toDouble(), 0.00001);
     }
 
+	@Test
     public void testEqualsHashcode()
     {
         assertEquals( MoneyFactory.fromDouble(50.4, 2), MoneyFactory.fromUnits(504,1));
@@ -75,6 +91,7 @@ public class MoneyTest extends TestCase {
         assertEquals( bd1.hashCode(), bd2.hashCode() );
     }
 
+	@Test
     public void testNegate()
     {
         final Money lng1 = MoneyFactory.fromDouble(45.5, 1);
@@ -88,6 +105,7 @@ public class MoneyTest extends TestCase {
         assertEquals( bd2, bd1.negate() );
     }
 
+	@Test
     public void testSubtract()
     {
         final Money lng1 = MoneyFactory.fromDouble(45.5, 1);
@@ -99,6 +117,7 @@ public class MoneyTest extends TestCase {
         assertEquals( "0", bd1.subtract( bd2 ).toString() );
     }
 
+	@Test
     public void testLongMultiply()
     {
         //long to long
@@ -139,6 +158,7 @@ public class MoneyTest extends TestCase {
         assertEquals(bdRes2, res6.toBigDecimal());
     }
 
+	@Test
     public void testDoubleMultiply()
     {
         final Money lng1 = MoneyFactory.fromString("35.5" );
@@ -175,17 +195,18 @@ public class MoneyTest extends TestCase {
         assertTrue(res6 instanceof MoneyBigDecimal);
     }
 
+	@Test
     public void testDivide()
     {
         //integer division
         final Money lng1 = MoneyFactory.fromDouble( 6.6, 1 );
         final Money res1 = lng1.divide( 2, 1 );
-        assertEquals( 3.3, res1.toDouble() );
+        assertEquals( 3.3, res1.toDouble(), 0.00001 );
         final Money res1d = lng1.divide( 2.0, 1 );
-        assertEquals( 3.3, res1d.toDouble() );
+        assertEquals( 3.3, res1d.toDouble(), 0.00001 );
         //normal division
         final Money res2 = lng1.divide( 10, 3 );
-        assertEquals( 0.66, res2.toDouble() );
+        assertEquals( 0.66, res2.toDouble(), 0.00001 );
 
         //bd division
         final BigDecimal tooLong = BigDecimal.ONE.divide( BigDecimal.valueOf( 3 ), MathContext.DECIMAL128 );
@@ -196,7 +217,7 @@ public class MoneyTest extends TestCase {
 
         //default double division
         final Money res4 = lng1.divide( 2.0, 2 );
-        assertEquals( 3.3, res4.toDouble() );
+        assertEquals( 3.3, res4.toDouble(), 0.00001 );
 
         final Money res5 = res3.divide( 1.0 / 6.0, 6 );
         assertEquals( "1", res5.toString() );
@@ -207,10 +228,11 @@ public class MoneyTest extends TestCase {
         //checking rounding
         final Money lng2 = MoneyFactory.fromUnits( 66, 2 );
         final Money res7 = lng2.divide( 2, 1 );
-        assertEquals( 0.3, res7.toDouble() );
+        assertEquals( 0.3, res7.toDouble(), 0.00001 );
     }
 
     //this test checks if we can use multiplication by a negative power of 10 in conjunction with rounding
+	@Test
     public void testDivisionRounding()
     {
         long expectedLong = 0;
@@ -224,10 +246,11 @@ public class MoneyTest extends TestCase {
             }
             final Money src = MoneyFactory.fromUnits( i, 2 );
             final Money res = src.divide( 2.0, 1 ); //it will always fit in 1 digit of precision
-            assertEquals( expected, res.toDouble() );
+            assertEquals( expected, res.toDouble(), 0.00001 );
         }
     }
 
+	@Test
     public void testTruncateLong()
     {
         final Money lng = MoneyFactory.fromString( "123.456" );
@@ -258,6 +281,7 @@ public class MoneyTest extends TestCase {
         assertEquals( "0.99", lng5.truncate( 2 ).toString() );
     }
 
+	@Test
     public void testTruncateBd()
     {
         final Money val = MoneyFactory.fromDouble( 123.456, 1 );
@@ -282,6 +306,7 @@ public class MoneyTest extends TestCase {
         assertEquals( "123", val3.truncate( 0 ).toString() );
     }
 
+	@Test
     public void testCompareTo()
     {
         final Money v1 = new MoneyLong( 20, 1 );
@@ -295,6 +320,7 @@ public class MoneyTest extends TestCase {
         assertTrue( v4.compareTo( v2 ) > 0 );
     }
 
+	@Test
     public void testTicket11()
     {
         final Money total = MoneyFactory.fromString( "5.5999999523162842" );
@@ -303,6 +329,7 @@ public class MoneyTest extends TestCase {
         assertNotNull( res ); //simply should not throw an exception
     }
 	
+    @Test
 	public void testSignum()
 	{
 		final Money ZERO = new MoneyLong(0,0);
@@ -330,6 +357,7 @@ public class MoneyTest extends TestCase {
 		assertEquals( v6.compareTo(ZERO), v6.signum( ) );
 	}
 	
+    @Test
 	public void isZero()
 	{
 		final Money v1 = new MoneyLong( 1, 1 );
@@ -347,6 +375,7 @@ public class MoneyTest extends TestCase {
 		assertTrue(v6.isZero());
     }
     
+    @Test
 	public void testMultiplicationIssue14() 
 	{
 		// allocation is 30%
@@ -366,7 +395,264 @@ public class MoneyTest extends TestCase {
             .divide(totalValue.toDouble(), 4);
 
         // it should be 30, as set initially.
-		assertEquals( 30d, currentAllocationD);
-		assertEquals( "30", currentAllocation.toString());
+        assertThat(currentAllocationD, is(equalTo(30.0d)));
+        assertThat(currentAllocation.toString(), is(equalTo("30")));
 	}
+    
+    @Test
+    public void testMultiplyOverflowFallback() {
+        Money a;
+        Money b;
+        
+        a = MoneyFactory.fromUnits(Long.MAX_VALUE, 0);
+        b = MoneyFactory.fromUnits(Long.MAX_VALUE, 0);
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        // this exceeds the range of LONG
+        assertTrue(a.multiply(b) instanceof MoneyBigDecimal);
+        
+        a = MoneyFactory.fromString("99999999999");
+        b = MoneyFactory.fromString("0.999999999");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        // this should produce over 18 digits in total, fallback to MoneyBigDecimal
+        assertTrue(a.multiply(b) instanceof MoneyBigDecimal);
+        
+        a = MoneyFactory.fromUnits(999999999, 9);
+        b = MoneyFactory.fromString("0.999999999");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        // this should produce over 15 decimal digits, fallback to MoneyBigDecimal
+        assertTrue(a.multiply(b) instanceof MoneyBigDecimal);
+        
+        
+        // the rest should fit nicely
+        a = MoneyFactory.fromUnits(Long.MAX_VALUE, 0);
+        b = MoneyFactory.fromUnits(1, 15);
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiply(b) instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(1, 0);
+        b = MoneyFactory.fromUnits(Long.MAX_VALUE, 15);
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiply(b) instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(99999999999l, 0);
+        b = MoneyFactory.fromString("0.000000001");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiply(b) instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(999999999999999999l, 0);
+        b = MoneyFactory.fromString("0.1");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiply(b) instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(999999999999999999l, 0);
+        b = MoneyFactory.fromString("2");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiply(b) instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(999999999, 0);
+        b = MoneyFactory.fromString("0.999999999");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiply(b) instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(999999999000000000l, 9);
+        b = MoneyFactory.fromString("0.999999999");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiply(b) instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(999999999, 8);
+        b = MoneyFactory.fromString("9.9999999");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiply(b) instanceof MoneyLong);
+    }
+    
+    @Test
+    public void testMultiplyLimtedScale() {
+        Money a, b, c;
+        
+        a = MoneyFactory.fromUnits(Long.MAX_VALUE, 0);
+        b = MoneyFactory.fromUnits(Long.MAX_VALUE, 0);
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        // this exceeds the range of LONG
+        assertTrue(a.multiplyLimitedScale(b) instanceof MoneyBigDecimal);
+        
+        a = MoneyFactory.fromString("99999999999");
+        b = MoneyFactory.fromString("0.999999999");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        // this should produce over 18 digits in total, fallback MoneyBigDecimal
+        assertTrue(a.multiplyLimitedScale(b) instanceof MoneyBigDecimal);
+        
+        a = MoneyFactory.fromUnits(999999999, 9);
+        b = MoneyFactory.fromString("0.999999999");
+        c = a.multiplyLimitedScale(b);
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        // this should produce 9 decimal digits or less
+        assertTrue(c instanceof MoneyLong);
+        assertThat(c, is(equalTo(MoneyFactory.fromUnits(999999998, 9))));
+        
+        // the rest should fit nicely
+        a = MoneyFactory.fromUnits(Long.MAX_VALUE, 0);
+        b = MoneyFactory.fromUnits(1, 15);
+        c = a.multiplyLimitedScale(b);
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(c instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(1, 0);
+        b = MoneyFactory.fromUnits(Long.MAX_VALUE, 15);
+        c = a.multiplyLimitedScale(b);
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(c instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(99999999999l, 0);
+        b = MoneyFactory.fromString("0.000000001");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiplyLimitedScale(b) instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(999999999999999999l, 0);
+        b = MoneyFactory.fromString("0.1");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiplyLimitedScale(b) instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(999999999999999999l, 0);
+        b = MoneyFactory.fromString("2");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiplyLimitedScale(b) instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(999999999, 0);
+        b = MoneyFactory.fromString("0.999999999");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiplyLimitedScale(b) instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(999999999000000000l, 9);
+        b = MoneyFactory.fromString("0.999999999");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiplyLimitedScale(b) instanceof MoneyLong);
+        
+        a = MoneyFactory.fromUnits(999999999, 8);
+        b = MoneyFactory.fromString("9.9999999");
+        assertTrue(a instanceof MoneyLong);
+        assertTrue(b instanceof MoneyLong);
+        assertTrue(a.multiplyLimitedScale(b) instanceof MoneyLong);
+    }
+   
+    
+    @DataProvider(name = "multiplyLimitedScaleData")
+	public static Object[][] multiplyLimitedScaleData() {
+        // {string as value, string as multiplier, expected result }
+        return new Object[][] { 
+            {"12345", "12345", new MoneyLong(152399025, (short) 0)},
+            {"1", "1", new MoneyLong(1, (short) 0)},
+            {Long.toString(Long.MAX_VALUE), "1", new MoneyLong(Long.MAX_VALUE, (short) 0)},
+            {"-1", Long.toString(Long.MAX_VALUE), new MoneyLong(-Long.MAX_VALUE, (short) 0)},
+            {"999999999", "999999999", new MoneyLong(999999998000000001l, 0)},
+            {"-999999999", "-999999999", new MoneyLong(999999998000000001l,0)},
+            {"-999999999", "999999999", new MoneyLong(-999999998000000001l, 0)},
+            {"999999999", "0.999999999", new MoneyLong(999999998000000001l, 9)},
+            {"999999999", "0.000000001", new MoneyLong(999999999, 9)},
+            {"0.000000001", "999999999", new MoneyLong(999999999, 9)},
+            {"0.999999999", "0.999999999", new MoneyLong(999999998l,9)},
+            
+            // should not result in overflow
+            {"0.000000001", "0.000000001", MoneyFactory.ZERO},
+            {"0.000000001", "-0.000000001", MoneyFactory.ZERO},
+            {"0.000000001", "0", MoneyFactory.ZERO},
+            {"999999999", "0", MoneyFactory.ZERO},
+            {"0", "-999999999", MoneyFactory.ZERO},
+            {Long.toString(Long.MAX_VALUE/4), "4", 
+                new MoneyLong(9223372036854775804l, 0)},
+            
+            // overflow cases
+            {Long.toString(Long.MAX_VALUE), "2", 
+                new MoneyBigDecimal(new BigDecimal(Long.MAX_VALUE).multiply((new BigDecimal(2))))},
+            {Long.toString(Long.MAX_VALUE), Long.toString(Long.MAX_VALUE), 
+                new MoneyBigDecimal(new BigDecimal(Long.MAX_VALUE).multiply((new BigDecimal(Long.MAX_VALUE))))},
+        };
+    }
+    
+    @Test(dataProvider = "multiplyLimitedScaleData")
+    public void testLimitedPrecisionMultiplication(String value, String multiplier, Object result) {
+        assertThat(MoneyFactory.fromString(value)
+                .multiplyLimitedScale(MoneyFactory.fromString(multiplier), 9),
+                is(equalTo(result)));
+    }
+    
+    @DataProvider(name = "validLimitedPrecisionMultiplicationData")
+	public static Object[][] validLimitedPrecisionMultiplicationData() {
+        // {string as value, string as multiplier, expected result }
+        return new Object[][] { 
+            {"12345", "12345", new MoneyLong(152399025, (short) 0)},
+            {"1", "1", new MoneyLong(1, (short) 0)},
+            {"999999999", "999999999", new MoneyLong(999999998000000000l, 0)},
+            {"-999999999", "-999999999", new MoneyLong(999999998000000000l,0)},
+            {"-999999999", "999999999", new MoneyLong(-999999998000000000l, 0)},
+            {"999999999", "0.999999999", new MoneyLong(999999998l, 0)},
+            {"999999999", "0.000000001", new MoneyLong(999999999, 9)},
+            {"0.000000001", "999999999", new MoneyLong(999999999, 9)},
+            {"0.999999999", "0.999999999", new MoneyLong(999999998l,9)},
+            {"0.000000001", "0.000000001", new MoneyBigDecimal("0.000000000000000001")},
+            {"0.000000001", "-0.000000001", new MoneyBigDecimal("-0.000000000000000001")},
+            {"0.000000001", "0", MoneyFactory.ZERO},
+            {"999999999", "0", MoneyFactory.ZERO},
+            {"0", "-999999999", MoneyFactory.ZERO},
+        };
+    }
+    
+    @Test(dataProvider = "validLimitedPrecisionMultiplicationData")
+    public void testValidFixedDigitMultiplication(String value, String multiplier, Object result) {
+        assertThat(MoneyFactory.fromString(value)
+                .multiplyLimitedPrecision(MoneyFactory.fromString(multiplier), 9),
+                is(equalTo(result)));
+    }
+    
+    
+    @DataProvider(name = "validDividions")
+	public static Object[][] validDivisionsData() {
+        // {string as value, string as multiplier, expected result }
+        return new Object[][] { 
+            {"1000", "10", new MoneyLong(100, 0)},
+            {"123456789000000000", "9", new MoneyLong(13717421000000000l, 0)},
+            {"123456789000000000", "1", new MoneyLong(123456789000000000l, 0)},
+            {"123456789", "0.000000001", new MoneyLong(123456789000000000l, 0)},
+            {"123456789", "-0.000000001", new MoneyLong(-123456789000000000l, 0)},
+            {"0.999999999", "0.999999999", MoneyFactory.ONE},
+            {"0.000000001", "999999999", MoneyFactory.ZERO},
+            {"0.000000001", "999999999000000000", MoneyFactory.ZERO},
+            {"0.1", "999999999", MoneyFactory.ZERO},
+            {"999999999", "0.999999999", new MoneyLong(1000000000, 0)},
+            {"999999999000000000", "999999999000000000", MoneyFactory.ONE},
+            {"999999999000000000", "-999999999000000000", new MoneyLong(-1, 0)},
+            {"0.123456789", "10000", new MoneyLong(12345, 9)},
+            {"-0.123456789", "10000", new MoneyLong(-12345, 9)},
+            {"-0", "10000", MoneyFactory.ZERO},
+            {"0", "-0.00000000100", MoneyFactory.ZERO},
+        };
+    }
+    
+    @Test(dataProvider = "validDividions")
+    public void testDivisionsWithMoney(String value, String divier, Object result) {
+        assertThat(MoneyFactory.fromString(value)
+                .divide(MoneyFactory.fromString(divier), 9),
+                is(equalTo(result)));
+    }
+
 }
