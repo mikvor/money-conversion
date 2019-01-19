@@ -23,12 +23,15 @@ import java.math.MathContext;
  * Some shared methods are kept here
  */
 abstract class AbstractMoney implements Money {
+
+    private static final long serialVersionUID = 3768997595589848975L;
     /**
      * Add another Money object to this one.
      *
      * @param other Other Money object
      * @return A new Money object normalized to the efficient representation if possible
      */
+    @Override
     public Money add( final Money other ) {
         if ( other instanceof MoneyLong )
             return add( ( MoneyLong ) other );
@@ -50,6 +53,7 @@ abstract class AbstractMoney implements Money {
      * @param other Other money object
      * @return A new Money object normalized to the efficient representation if possible
      */
+    @Override
     public Money subtract( final Money other )
     {
         return add( other.negate() );
@@ -70,6 +74,7 @@ abstract class AbstractMoney implements Money {
      * than {@code other}. This specification may possibly change to -x or x with x representing the difference in
      * precision. I.E If the number is negative than it will still be numerically less than {@code other}.
      */
+	@Override
     public int compareTo(final Money other) {
         if (other instanceof MoneyLong) return compareTo((MoneyLong) other);
         else return compareTo((MoneyBigDecimal) other);
@@ -79,6 +84,11 @@ abstract class AbstractMoney implements Money {
 
     public int compareTo(final MoneyBigDecimal other) {
         return toBigDecimal().compareTo(other.toBigDecimal());
+    }
+    
+    @Override
+    public Money multiplyLimitedScale( final Money multiplier ) {
+        return this.multiplyLimitedScale(multiplier, this.getScale());
     }
 }
 

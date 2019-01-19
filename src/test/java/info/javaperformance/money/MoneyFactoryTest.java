@@ -16,11 +16,16 @@
 
 package info.javaperformance.money;
 
-import junit.framework.TestCase;
 
 import java.math.BigDecimal;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.testng.annotations.Test;
 
-public class MoneyFactoryTest extends TestCase {
+public class MoneyFactoryTest {
+	
+	@Test
     public void testLongConversions()
     {
         double val = 0;
@@ -37,6 +42,7 @@ public class MoneyFactoryTest extends TestCase {
         }
     }
 
+	@Test
     public void testBDConversions()
     {
         double val = 0.05;
@@ -54,6 +60,7 @@ public class MoneyFactoryTest extends TestCase {
         }
     }
 
+	@Test
     public void testFromUnits()
     {
         for ( int i = 0; i < 10000; ++i )
@@ -63,12 +70,14 @@ public class MoneyFactoryTest extends TestCase {
         }
     }
 
+	@Test
     public void testToBd()
     {
         final Money money = MoneyFactory.fromUnits( 1, 1 );
         assertEquals( new BigDecimal( "0.1" ), money.toBigDecimal() );
     }
 
+	@Test
     public void testFromString()
     {
         //too long 1
@@ -95,6 +104,7 @@ public class MoneyFactoryTest extends TestCase {
         }
     }
 
+	@Test
     public void testFromBd()
     {
         final Money lng1 = MoneyFactory.fromBigDecimal( new BigDecimal("0.00005") );
@@ -127,6 +137,7 @@ public class MoneyFactoryTest extends TestCase {
         assertEquals( val5, bd5.toString() );
     }
 
+	@Test
     public void testFromCharArray()
     {
         final char[] buffer = new char[ 100 ];
@@ -138,6 +149,7 @@ public class MoneyFactoryTest extends TestCase {
         toCharArrayHelper(buffer, "12345");
     }
 
+	@Test
     public void testFromByteArray()
     {
         final byte[] buffer = new byte[ 100 ];
@@ -149,6 +161,7 @@ public class MoneyFactoryTest extends TestCase {
         toByteArrayHelper(buffer, "12345");
     }
 
+	@Test
     public void testSigns()
     {
         assertEquals( "1", MoneyFactory.fromString("+1").toString() );
@@ -157,18 +170,21 @@ public class MoneyFactoryTest extends TestCase {
         assertEquals( "-1", MoneyFactory.fromString("-1.0").toString() );
     }
 
+	@Test
     private void toCharArrayHelper(final char[] buffer, final String number) {
         char[] chars = number.toCharArray();
         System.arraycopy(chars, 0, buffer, 10, chars.length);
         assertEquals( number, MoneyFactory.fromCharArray(buffer, 10, chars.length).toString() );
     }
 
+	@Test
     private void toByteArrayHelper(final byte[] buffer, final String number) {
         byte[] bytes = number.getBytes();
         System.arraycopy(bytes, 0, buffer, 10, bytes.length);
         assertEquals( number, MoneyFactory.fromByteArray(buffer, 10, bytes.length).toString() );
     }
 
+	@Test
     public void testManyDecimals() {
         // 8860415583022323200
         //  804798809343434368
@@ -182,6 +198,7 @@ public class MoneyFactoryTest extends TestCase {
         assertTrue("Value of newSum is " + newSum, newSum.toDouble() > 0);
     }
 
+	@Test
     public void testManyDecimals2() {
         Money sum = MoneyFactory.fromCharSequence(  "9999998860.4155830223232" );
         Money toAdd = MoneyFactory.fromCharSequence( "999999804.798809343434368" );
@@ -190,6 +207,7 @@ public class MoneyFactoryTest extends TestCase {
         assertTrue("Value of newSum is " + newSum, newSum.toDouble() > 0);
     }
 
+	@Test
     public void testBigDecimals() {
         //22543.6089278196672         //18 digits, precision=13
         //  805.694827586206976       //18 digits, precision=15

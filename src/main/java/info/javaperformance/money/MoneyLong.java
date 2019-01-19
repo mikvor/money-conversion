@@ -16,13 +16,16 @@
 
 package info.javaperformance.money;
 
+//import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.math.RoundingMode;
 
 /**
  * The most efficient implementation storing the number of currency units in <code>long</code> field.
  */
+//@JsonSerialize(using = JsonHelpers.MoneySerializer.class)
 class MoneyLong extends AbstractMoney {
 
     /** Number of currency units in your precision */
@@ -237,7 +240,7 @@ class MoneyLong extends AbstractMoney {
         if ( origUnits != m_units )
         {
             final BigInteger res = BigInteger.valueOf( m_units ).multiply( BigInteger.valueOf( multiplier ) );
-            return MoneyFactory.fromBigDecimal( new BigDecimal( res ) );
+            return MoneyFactory.fromBigDecimal( new BigDecimal( res, m_precision ) );
         }
         return new MoneyLong( resUnits, m_precision ).normalize();
     }
@@ -328,5 +331,238 @@ class MoneyLong extends AbstractMoney {
         //remove not needed digits
         //we can multiply by floating point values here because we will round the result afterwards
         return new MoneyLong( Math.round( m_units * MoneyFactory.MULTIPLIERS_NEG[ m_precision - maximalPrecision ] ), maximalPrecision ).normalize();
+    }
+    
+    /**
+     * Round up the current value leaving no more than {@code maximalPrecision} signs after decimal point.
+     * The number will be rounded towards closest higher digit
+     *
+     * @param maximalPrecision Required precision
+     * @return A new Money object normalized to the efficient representation if possible
+     */
+    public Money ceil( final int maximalPrecision ) {
+        if ( m_precision <= maximalPrecision )
+            return this;
+        MoneyFactory.checkPrecision( maximalPrecision );
+
+        //remove not needed digits
+        //we can multiply by floating point values here because we will round the result afterwards
+        // add 0.5 to strongly influence the rouding to always round up
+        
+        return new MoneyLong( Math.round( m_units * MoneyFactory.MULTIPLIERS_NEG[ m_precision - maximalPrecision ] + 0.5), maximalPrecision ).normalize();
+    }
+
+    @Override
+    public int signum() {
+        return Long.signum(m_units);
+    }
+    
+    @Override
+	public boolean isZero() {
+		return signum() == 0;
+	}
+
+	@Override
+	public long unscaledValue() {
+		return m_units;
+	}
+
+    @Override
+    public int getScale() {
+        return m_precision;
+    }
+    
+    @Override
+    public Money multiply(Money multiplier) {
+        if(multiplier instanceof MoneyBigDecimal) {
+            return new MoneyBigDecimal(toBigDecimal()).multiply(multiplier);
+        }
+        
+        final long otherLong = multiplier.unscaledValue();
+        final long resUnits = m_units * otherLong;
+        final int resultingPrecision = m_precision + multiplier.getScale();
+        //fast overflow test - if both values fit in the 32 bits (and positive), they can not overflow
+        if (((m_units | otherLong) & MASK32) == 0) {
+            if (resultingPrecision <= MoneyFactory.MAX_ALLOWED_PRECISION) {
+                return new MoneyLong(resUnits, m_precision + multiplier.getScale()).normalize();
+            }
+        }
+
+        //slower overflow test - check if we will get the original value back after division. It is not possible
+        //in case of overflow.
+        final long origUnits = resUnits / otherLong;
+        if (origUnits == m_units) {
+            if (resultingPrecision <= MoneyFactory.MAX_ALLOWED_PRECISION) {
+                return new MoneyLong(resUnits, m_precision + multiplier.getScale()).normalize();
+            }
+        }
+        
+        return new MoneyBigDecimal(toBigDecimal()).multiply(multiplier);
+    }
+    
+     @Override
+    public Money multiplyLimitedPrecision(final Money multiplier, final int significantDigitCount) {
+        if(multiplier instanceof MoneyBigDecimal) {
+            return new MoneyBigDecimal(toBigDecimal()).multiply(multiplier);
+        }
+        
+        final long otherLong = multiplier.unscaledValue();
+        long resUnits = m_units * otherLong;
+        int resultingPrecision = m_precision + multiplier.getScale();
+      
+        // if one of the numbers did not fit into INT32, we may have caused an overflow.
+        if (((m_units | otherLong) & MASK32) != 0) {
+            
+            // may have overflowed, check deeper
+            final long origUnits = resUnits / otherLong;
+            if (origUnits != m_units) {
+                return new MoneyBigDecimal(toBigDecimal()).multiplyLimitedPrecision(multiplier, significantDigitCount);
+            }
+        }
+        
+        // truncate to significant digits
+        int lenDiff = digitCount(resUnits) - significantDigitCount;
+        while (lenDiff > 0) {
+            if(resultingPrecision >= lenDiff) {
+                resUnits /= MoneyFactory.MULTIPLIERS[lenDiff];
+                resultingPrecision -= lenDiff;
+                lenDiff = 0;
+//                return new MoneyLong(resUnits, resultingPrecision-lenDiff).normalize();
+            } else if(resultingPrecision > 0) {
+                resUnits /= MoneyFactory.MULTIPLIERS[resultingPrecision];
+                lenDiff -= resultingPrecision;
+                resultingPrecision = 0;
+//                return new MoneyLong(resUnits, resultingPrecision-lenDiff).normalize();
+            } else {
+                long remainder = resUnits % MoneyFactory.MULTIPLIERS[lenDiff];
+                resUnits -= remainder;
+                lenDiff = 0;
+            }
+        }
+        
+        if (resultingPrecision <= MoneyFactory.MAX_ALLOWED_PRECISION) {
+            return new MoneyLong(resUnits, resultingPrecision).normalize();
+        }
+        
+        return new MoneyBigDecimal(toBigDecimal()).multiplyLimitedPrecision(multiplier, significantDigitCount);
+    }
+    
+    @Override
+    public Money multiplyLimitedScale( final Money multiplier ) {
+        return multiplyLimitedScale(multiplier, m_precision);
+    }
+    
+    @Override
+    public Money multiplyLimitedScale( final Money multiplier, final int scale ) {
+        if(multiplier instanceof MoneyBigDecimal || scale > MoneyFactory.MAX_ALLOWED_PRECISION) {
+            return new MoneyBigDecimal(toBigDecimal()).multiplyLimitedScale(multiplier, scale);
+        }
+        
+        final long otherLong = multiplier.unscaledValue();
+        long resUnits = m_units * otherLong;
+        int resultingPrecision = m_precision + multiplier.getScale();
+      
+        // if one of the numbers did not fit into INT32, we may have caused an overflow.
+        if (((m_units | otherLong) & MASK32) != 0) {
+            
+            // may have overflowed, check deeper
+            final long origUnits = resUnits / otherLong;
+            if (origUnits != m_units) {
+                return new MoneyBigDecimal(toBigDecimal()).multiplyLimitedScale(multiplier, scale);
+            }
+        }
+        
+        // truncate to required precision
+        int precisionDiff = resultingPrecision - scale;
+        if(precisionDiff > 0) {
+            resUnits /= MoneyFactory.MULTIPLIERS[precisionDiff];
+            resultingPrecision -= precisionDiff;
+        }
+        
+        return new MoneyLong(resUnits, resultingPrecision).normalize();
+    }
+    
+    @Override
+    public Money divide(Money divisor, int precision) {
+        return divideWithPrecisionGuarantee(divisor, precision, true);
+    }
+    
+    /**
+     * Guarantees that the resulting money will contain at least 'digits' count of significant digits or more
+     * @param divisor
+     * @param digits the number of significant digits in the result (if needed, the rest is truncated)
+     * @param allowMore give the exact number of significant digits, or more if available
+     * @return 
+     */
+    private Money divideWithDigitsGuarantee(Money divisor, int digits, boolean allowMore) {
+        if(divisor instanceof MoneyLong) {
+            MoneyLong div = (MoneyLong) divisor;
+            
+            // we want to achieve maximum possible number of digits after an integer division.
+            // This will hopefully yield at least 'precision' count of digits or more
+            // we calculate the largest number that still fits into LONG and use that as the dividend
+            final int dividendLen = digitCount(m_units);
+            final int maxPossibleShift = Math.max(0, MoneyFactory.MAX_POW10 - dividendLen);
+
+            // maxPossibleShift may still be less, than the necessary shift to achieve the required number of digits
+            // after an integer division
+            // The theory is that dividend must be at least 10^precision bigger than divisor to fulfill the guarantee
+            final int divisorLen = digitCount(div.m_units);
+            // the necessary shift to guarantee the precision is to shift by the number of decimals.
+            final int necessaryShift = digits - (dividendLen - divisorLen);
+            if (necessaryShift > maxPossibleShift) {
+                final int precisionAfterDivide = necessaryShift + m_precision - div.m_precision;
+                return MoneyFactory.fromBigDecimal(toBigDecimal().divide(divisor.toBigDecimal(), precisionAfterDivide, RoundingMode.DOWN));
+            }
+
+            final long aUnits = m_units * MoneyFactory.MULTIPLIERS[maxPossibleShift];
+            final int precisionAfterDivide = maxPossibleShift + m_precision - div.m_precision;
+            final long res = aUnits / div.m_units; //this automatically truncates fractional parts
+            if (allowMore) {
+                return new MoneyLong(res / MoneyFactory.MULTIPLIERS[precisionAfterDivide - digits], digits).normalize();
+            } else {
+                return new MoneyLong(res, precisionAfterDivide).normalize();
+            }
+        } 
+        
+        return MoneyFactory.fromBigDecimal(toBigDecimal().divide(divisor.toBigDecimal(), MoneyFactory.MAX_ALLOWED_PRECISION, RoundingMode.DOWN));
+    }
+    
+    /**
+     * Guarantees that the resulting money will have exactly the required 'precision'
+     * @param divisor
+     * @param precision
+     * @param allowMore give the exact number of precision digits, or more if available
+     * @return 
+     */
+    private Money divideWithPrecisionGuarantee(Money divisor, int precision, boolean allowMore) {
+        if(divisor instanceof MoneyLong) {
+            MoneyLong div = (MoneyLong) divisor;
+            
+            final int dividendLen = digitCount(m_units);
+            // maximum multipler that when applied to the dividend will still fit into LONG without overflow
+            final int maxPossibleShift = Math.max(0, MoneyFactory.MAX_POW10 - dividendLen);
+            final int necessaryShift = precision - (m_precision - div.m_precision);
+            if (necessaryShift > maxPossibleShift) {
+                return MoneyFactory.fromBigDecimal(toBigDecimal().divide(divisor.toBigDecimal(), precision, RoundingMode.DOWN));
+            }
+
+            if(allowMore) {
+                final long aUnits = m_units * MoneyFactory.MULTIPLIERS[necessaryShift];
+                final long res = aUnits / div.m_units; //this automatically truncates fractional parts
+                return new MoneyLong(res, precision).normalize();
+            } else {
+                final long aUnits = m_units * MoneyFactory.MULTIPLIERS[maxPossibleShift];
+                final long res = aUnits / div.m_units; //this automatically truncates fractional parts
+                final int precisionAfterDivide = maxPossibleShift + m_precision - div.m_precision;
+                return new MoneyLong(res, precisionAfterDivide).normalize();
+            }
+        } 
+        
+        return MoneyFactory.fromBigDecimal(toBigDecimal().divide(divisor.toBigDecimal(), precision, RoundingMode.DOWN));
+    }
+    
+    static int digitCount(long num) {
+        return Log10.log10Quick(Math.abs(num)) + 1;
     }
 }
